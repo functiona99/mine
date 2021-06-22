@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.yoo.mapper.MainMapper">
+
+<!-- 유선영 - 전체 검색 로직 구현 -->
+
+<!-- 검색어를 입력 안 했을 때 (where절 따로 처리할 수 있는 방법 찾기)-->
+<!-- selectbox에서 여러 개 검색할 때(동적 쿼리문 사용해서)-->
+<sql id="criteria">
+<where>
+
+		<if test="type != null and keyword!=null">
+			<trim prefix="and (" suffix=")" prefixOverrides="OR">
+				<foreach collection="typeArr" item= 'type'>
+					<trim prefix="OR">
+						<choose>
+							<when test="type=='T'.toString()"> title like '%' ||#{keyword}||'%'</when>
+							<when test="type=='C'.toString()"> content like '%' ||#{keyword}||'%'</when>
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+		<if test="location != null">
+				and location like '%' ||#{location}||'%'
+		</if>
+		<if test="tagArr != null">
+			and sno in (select sno from np_service_tag where tag =
+			<trim suffix=")">
+				<foreach collection="tagArr" index="i" item="tag" separator="or tag =" >
+					#{tag}
+				</foreach>
+			</trim>
+		</if>
+
+</where>
+</sql>
+
+<sql id="criteria1">
+		<trim prefix="where (" suffix=")" prefixOverrides="OR">
+				<foreach collection="typeArr" item= 'type'>
+					<trim prefix="OR">
+						<choose>
+							<when test="type=='T'.toString()"> title like '%' ||#{keyword}||'%' </when>
+							<when test="type=='C'.toString()"> content like '%' ||#{keyword}||'%' </when>
+						</choose>
+					</trim>
+				</foreach>
+		</trim>
+	</sql>
+	
+<sql id="criteria3">
+<where>
+
+</where>
+</sql>	
+
+<select id="search" resultType="org.yoo.domain.ServiceVO">
+	select * from np_service
+	<include refid = "criteria"></include>
+</select>
+
+<!-- <select id="getListWithPaging" resultType="org.yoo.domain.ServiceVO">
+	<![CDATA[
+		select sno, title, content
+		from
+		np_service
+	]]>
+	
+	<include refid = "criteria"></include>
+</select> -->
+
+
+
+</mapper>
+
